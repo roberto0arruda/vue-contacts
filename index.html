@@ -14,15 +14,15 @@
 
 <body>
     <div id="app">
-        <h1 class="jumbotron">Title application</h1>
+        <h1 class="jumbotron">{{ message }}</h1>
         <div class="col-2">
             <label for="">Nome</label>
-            <input type="text">
+            <input type="text" v-model="contact.name">
 
             <label for="">Telefone</label>
-            <input type="text">
+            <input type="number" v-model="contact.telephone">
 
-            <button class="mt-3 mb-3 btn btn-success">Adicionar</button>
+            <button class="mt-3 mb-3 btn btn-success" v-on:click="addContact">Adicionar</button>
         </div>
 
         <table class="table">
@@ -34,20 +34,75 @@
                     <th scope="col">Ação</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <th scope="row"></th>
-                    <td></td>
-                    <td></td>
+            <tbody v-if="list.length > 0">
+                <tr v-for="(item, index) in list" :key="index">
+                    <th scope="row">{{ item.id }}</th>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.telephone }}</td>
                     <td>
-                        <button class="btn btn-info">Editar</button>
-                        <button class="btn btn-danger">Excluir</button>
+                        <button class="btn btn-info" v-on:click="editContact(item)">Editar</button>
+                        <button class="btn btn-danger" v-on:click="removeContact(item)">Excluir</button>
                     </td>
+                </tr>
+            </tbody>
+            <tbody v-else class="text-center">
+                <tr>
+                    <th colspan="4">Você não tem contatos</th>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    <!-- Código javascript do VueJS -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+        // Instânciando o VueJS
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    message: 'Agenda Telefônica',
+                    contact: {
+                        id: 0,
+                        name: null,
+                        telephone: null
+                    },
+                    index: null,
+                    list: []
+                }
+            },
+            mounted() {
+                const contacts = JSON.parse(localStorage.getItem('contacts'))
+                this.list = contacts ? contacts : []
+            },
+            methods: {
+                addContact() {
+                    if (this.contact.id === 0) {
+                        this.contact.id = this.list.length + 1
+                        this.list.push(this.contact)
+                    } else {
+                        this.list[this.index] = this.contact
+                    }
+                    localStorage.setItem('contacts', JSON.stringify(this.list))
+                    this.contact = {
+                        id: 0,
+                        name: null,
+                        telephone: null
+                    }
+                },
+                editContact(item) {
+                    this.index = this.list.indexOf(item)
+                    this.contact = Object.assign({}, item)
+                    localStorage.setItem('contacts', JSON.stringify(this.list))
+                },
+                removeContact(item) {
+                    const idx = this.list.indexOf(item)
+                    this.list.splice(idx, 1)
+                    localStorage.setItem('constacts', JSON.stringify(this.list))
+                }
+            }
+        })
+    </script>
 </body>
 
 </html>
